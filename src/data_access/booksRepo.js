@@ -1,3 +1,4 @@
+const { ExistingDataError } = require("../errors/errors.js")
 const dbConnection = require("../utils/dbConnection.js")
 
 const qryAllBooks = async () => {
@@ -15,19 +16,47 @@ const qryAllBooks = async () => {
 	}
 }
 
-const createNewBookQry = async (book) => {
-    const db = await dbConnection.connect()
+const qryExisting = async (book) => {
+	const db = await dbConnection.connect()
+	const chkExisting = `select * from books where title = $1 and publication_date = $2`
+	try {
+		const result = await db.query(chkExisting, [
+			book.title,
+			book.publication_date,
+        ])
+        // return result.rows.length > 0
+        const existing = result.rows.length
+        console.log(existing)
+        if (existing !== 0) {
+            return true
+        }
+	} catch (e) {
+		console.error(e)
+	} finally {
+		db.release()
+	}
+}
 
-    try {
-        const sqlQuery = `INSERT INTO books (title, type, author, topic, publication_date, pages) VALUES ($1, $2, $3, $4, $5, $6) returning *`
-        const result = await db.query(sqlQuery, [book.title, book.type, book.author, book.topic, book.publication_date, book.pages])
-        return result.rows
-    } catch (e) {
-        console.log(e);
-        throw e
-    } finally {
-        db.release()
-    }
+const createNewBookQry = async (book) => {
+	const db = await dbConnection.connect()
+
+	try {
+		const sqlQuery = `INSERT INTO books (title, type, author, topic, publication_date, pages) VALUES ($1, $2, $3, $4, $5, $6) returning *`
+		const result = await db.query(sqlQuery, [
+			book.title,
+			book.type,
+			book.author,
+			book.topic,
+			book.publication_date,
+			book.pages,
+		])
+		return result.rows
+	} catch (e) {
+		console.log(e)
+		throw e
+	} finally {
+		db.release()
+	}
 }
 
 const qryBookById = async (id) => {
@@ -38,27 +67,34 @@ const qryBookById = async (id) => {
 		const result = await db.query(sqlQuery, [id])
 		return result.rows
 	} catch (e) {
-        console.log(e)
-        throw e
+		console.log(e)
+		throw e
 	} finally {
 		db.release()
 	}
 }
 
-// const updateBookByIdQry = async (book) => {
-//     const db = await dbConnection.connect()
+const updateBookByIdQry = async (book) => {
+	const db = await dbConnection.connect()
 
-//     try {
-//         const sqlQuery = `update books set title = $1, type = $2, author = $3, topic = $4, publication_date = $5, pages = $6 where id=${id}`
-//         const result = await db.query(sqlQuery, [book.title, book.type, book.author, book.topic, book.publication_date, Number(book.pages)])
+	try {
+		const sqlQuery = `update books set title = $1, type = $2, author = $3, topic = $4, publication_date = $5, pages = $6 where id=${id}`
+		const result = await db.query(sqlQuery, [
+			book.title,
+			book.type,
+			book.author,
+			book.topic,
+			book.publication_date,
+			Number(book.pages),
+		])
 
-//         return result.rows[0]
-//     } catch (e) {
-//         console.log(e);
-//     } finally {
-//         db.release()
-//     }
-// }
+		return result.rows[0]
+	} catch (e) {
+		console.log(e)
+	} finally {
+		db.release()
+	}
+}
 
 const deleteBookByIdQry = async (id) => {
 	const db = await dbConnection.connect()
@@ -88,6 +124,7 @@ const deleteBookByIdQry = async (id) => {
 module.exports = {
 	qryAllBooks,
 	qryBookById,
+	qryExisting,
 	deleteBookByIdQry,
 	createNewBookQry, //updateBookByIdQry
 }
