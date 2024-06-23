@@ -1,7 +1,5 @@
 const express = require('express')
-
 const booksRouter = express.Router()
-
 const {
 	getAllBooks, getBookById,
 	deleteBookById, createNewBook, updateBookById
