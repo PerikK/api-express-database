@@ -23,13 +23,11 @@ const qryExisting = async (book) => {
 		const result = await db.query(chkExisting, [
 			book.title,
 			book.publication_date,
-        ])
-        // return result.rows.length > 0
-        const existing = result.rows.length
-        console.log(existing)
-        if (existing !== 0) {
-            return true
-        }
+		])
+		const existing = result.rows.length
+		if (existing !== 0) {
+			return true
+		}
 	} catch (e) {
 		console.error(e)
 	} finally {
@@ -74,18 +72,19 @@ const qryBookById = async (id) => {
 	}
 }
 
-const updateBookByIdQry = async (book) => {
+const updateBookByIdQry = async (id,book) => {
 	const db = await dbConnection.connect()
 
 	try {
-		const sqlQuery = `update books set title = $1, type = $2, author = $3, topic = $4, publication_date = $5, pages = $6 where id=${id}`
-		const result = await db.query(sqlQuery, [
+		const sqlQuery = `update books set title = $1, type = $2, author = $3, topic = $4, publication_date = $5, pages = $6 where id=$7 returning *`
+        const result = await db.query(sqlQuery, [
 			book.title,
 			book.type,
 			book.author,
 			book.topic,
 			book.publication_date,
-			Number(book.pages),
+            book.pages,
+            id
 		])
 
 		return result.rows[0]
@@ -126,5 +125,6 @@ module.exports = {
 	qryBookById,
 	qryExisting,
 	deleteBookByIdQry,
-	createNewBookQry, //updateBookByIdQry
+	createNewBookQry,
+	updateBookByIdQry,
 }

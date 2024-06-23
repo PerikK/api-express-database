@@ -19,8 +19,8 @@ const getAllBooks = async (req, res, next) => {
 }
 
 const createNewBook = async (req, res, next) => {
-    const book = req.body
-    const bookExists = await qryExisting(book)
+	const book = req.body
+	const bookExists = await qryExisting(book)
 	const bookProps = [
 		"title",
 		"type",
@@ -36,14 +36,14 @@ const createNewBook = async (req, res, next) => {
 			throw new MissingFieldsError(
 				"Title, type, author, topic, pub_date, and number of pages must be provided to add a new book"
 			)
-        }        
-		console.log(bookExists);
+		}
+
 		if (bookExists === true) {
 			throw new ExistingDataError(
 				"This book is already in the database"
 			)
-        }
-        
+		}
+
 		const newBook = await createNewBookQry(book)
 		res.status(201).json({ newBook })
 	} catch (e) {
@@ -74,6 +74,12 @@ const deleteBookById = async (req, res, next) => {
 	const bookId = Number(req.params.id)
 
 	try {
+		const existing = await qryBookById(bookId)
+		if (existing.length === 0) {
+			throw new DataNotFoundError(
+				"There is no book with the provided ID"
+			)
+		}
 		const book = await deleteBookByIdQry(bookId)
 		res.status(201).json({ book: book })
 	} catch (e) {
@@ -83,9 +89,29 @@ const deleteBookById = async (req, res, next) => {
 	}
 }
 
+const updateBookById = async (req, res, next) => {
+	const bookId = Number(req.params.id)
+	console.log(bookId)
+	const newBookProps = req.body
+	try {
+		const existing = await qryBookById(bookId)
+		if (existing.length === 0) {
+			throw new DataNotFoundError(
+				"There is no book with the provided ID"
+			)
+		}
+		const bookToUpdate = await updateBookByIdQry(bookId, newBookProps)
+		res.status(201).json({ "updated book": bookToUpdate })
+	} catch (e) {
+		console.log(e)
+		next(e)
+	}
+}
+
 module.exports = {
 	getAllBooks,
 	getBookById,
 	deleteBookById,
 	createNewBook,
+	updateBookById,
 }

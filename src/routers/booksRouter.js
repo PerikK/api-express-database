@@ -4,7 +4,7 @@ const booksRouter = express.Router()
 
 const {
 	getAllBooks, getBookById,
-	deleteBookById, createNewBook
+	deleteBookById, createNewBook, updateBookById
 } = require("../controllers/booksController.js")
 
 
@@ -16,21 +16,10 @@ booksRouter.post("/", createNewBook)
 
 booksRouter.delete('/:id', deleteBookById)
 
+booksRouter.put("/:id", updateBookById)
 
 
 
 module.exports = booksRouter
 
 
-
-// // Write routes here...
-// booksRouter.get("/", getAllBooks)
-
-// booksRouter.post("/", createNewBook)
-
-// booksRouter.get("/:id", getBookById)
-
-// booksRouter.delete("/:id", deleteBookById)
-
-// booksRouter.put("/:id", updateBookById)
-// module.exports = booksRouter
