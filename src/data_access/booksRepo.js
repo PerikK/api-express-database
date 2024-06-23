@@ -1,4 +1,4 @@
-const { ExistingDataError } = require("../errors/errors.js")
+const { ExistingDataError, } = require("../errors/errors.js")
 const dbConnection = require("../utils/dbConnection.js")
 
 const qryAllBooks = async () => {
@@ -10,7 +10,8 @@ const qryAllBooks = async () => {
 
 		return result.rows
 	} catch (e) {
-		console.log(e)
+        console.log(e)
+        throw e
 	} finally {
 		db.release()
 	}
@@ -29,7 +30,7 @@ const qryExisting = async (book) => {
 			return true
 		}
 	} catch (e) {
-		console.error(e)
+        console.error(e)
 	} finally {
 		db.release()
 	}
@@ -89,7 +90,8 @@ const updateBookByIdQry = async (id,book) => {
 
 		return result.rows[0]
 	} catch (e) {
-		console.log(e)
+        console.log(e)
+        throw e
 	} finally {
 		db.release()
 	}

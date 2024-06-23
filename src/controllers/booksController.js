@@ -91,8 +91,8 @@ const deleteBookById = async (req, res, next) => {
 
 const updateBookById = async (req, res, next) => {
 	const bookId = Number(req.params.id)
-	console.log(bookId)
-	const newBookProps = req.body
+    const newBookProps = req.body
+    
 	try {
 		const existing = await qryBookById(bookId)
 		if (existing.length === 0) {

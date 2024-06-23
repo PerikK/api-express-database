@@ -11,6 +11,7 @@ app.use(express.json())
 
 //TODO: Implement books and pets APIs using Express Modular Routers
 const booksRouter = require("../src/routers/booksRouter.js")
+const petsRouter = require('../src/routers/petsRouter.js')
 const {
 	MissingFieldsError,
 	ExistingDataError,
@@ -18,6 +19,7 @@ const {
 } = require("./errors/errors.js")
 
 app.use("/books", booksRouter)
+app.use('/pets', petsRouter)
 
 
 app.use((error, req, res, next) => {
