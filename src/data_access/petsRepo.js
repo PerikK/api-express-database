@@ -22,8 +22,8 @@ const qryExisting = async (pet) => {
 	try {
 		const result = await db.query(chkExisting, [
 			pet.name,
-            pet.type,
-            pet.breed
+			pet.type,
+			pet.breed,
 		])
 		const existing = result.rows.length
 		if (existing !== 0) {
@@ -46,7 +46,7 @@ const createNewPetQry = async (pet) => {
 			pet.age,
 			pet.type,
 			pet.breed,
-			pet.has_microchip
+			pet.has_microchip,
 		])
 		return result.rows
 	} catch (e) {
@@ -72,7 +72,59 @@ const qryPetById = async (id) => {
 	}
 }
 
+const updatePetByIdQry = async (id, pet) => {
+	const db = await dbConnection.connect()
+
+	try {
+		const sqlQuery = `update pets set name = $1, age = $2, type = $3, breed = $4, has_microchip = $5 where id=$6 returning *`
+		const result = await db.query(sqlQuery, [
+			pet.name,
+			pet.age,
+			pet.type,
+			pet.breed,
+			pet.has_microchip,
+			id,
+		])
+
+		return result.rows[0]
+	} catch (e) {
+		console.log(e)
+		throw e
+	} finally {
+		db.release()
+	}
+}
+
+const deletePetByIdQry = async (id) => {
+	const db = await dbConnection.connect()
+
+	try {
+		await db.query("begin")
+		const selectQry = "SELECT * FROM pets WHERE id = $1"
+		const selectResult = await db.query(selectQry, [id])
+
+		if (selectResult.rows.length === 0) {
+			throw new Error("Pet not found")
+		}
+
+		const delQuery = "delete from pets where id=$1 returning *"
+		const result = await db.query(delQuery, [id])
+		await db.query("commit")
+		return result.rows
+	} catch (e) {
+		await db.query("ROLLBACK")
+		console.log(e)
+		throw e
+	} finally {
+		db.release()
+	}
+}
 
 module.exports = {
-    qryAllPets, qryExisting, qryPetById, createNewPetQry
+	qryAllPets,
+	qryExisting,
+	qryPetById,
+	createNewPetQry,
+	updatePetByIdQry,
+	deletePetByIdQry,
 }

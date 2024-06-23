@@ -3,6 +3,8 @@ const {
 	qryExisting,
 	qryPetById,
 	createNewPetQry,
+	updatePetByIdQry,
+	deletePetByIdQry,
 } = require("../data_access/petsRepo.js")
 
 const {
@@ -59,8 +61,48 @@ const createNewPet = async (req, res, next) => {
 	}
 }
 
+const updatePetById = async (req, res, next) => {
+	const petId = Number(req.params.id)
+	const newPetProps = req.body
+
+	try {
+		const existing = await qryPetById(petId)
+		if (existing.length === 0) {
+			throw new DataNotFoundError(
+				"There is no pet with the provided ID"
+			)
+		}
+		const petToUpdate = await updatePetByIdQry(petId, newPetProps)
+		res.status(201).json({ "updated pet": petToUpdate })
+	} catch (e) {
+		console.log(e)
+		next(e)
+	}
+}
+
+const deletePetById = async (req, res, next) => {
+	const petId = Number(req.params.id)
+
+	try {
+		const existing = await qryPetById(petId)
+		if (existing.length === 0) {
+			throw new DataNotFoundError(
+				"There is no pet with the provided ID"
+			)
+		}
+		const pet = await deletePetByIdQry(petId)
+		res.status(201).json({ pet: pet })
+	} catch (e) {
+		console.log(e)
+		res.status(404).json({ error: e.message })
+		next(e)
+	}
+}
+
 module.exports = {
 	getAllPets,
-    getPetById,
-    createNewPet
+	getPetById,
+	createNewPet,
+	updatePetById,
+	deletePetById,
 }
